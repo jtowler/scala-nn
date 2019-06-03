@@ -7,15 +7,15 @@ class NetworkTest extends FlatSpec with Matchers {
     val net = new Network(List(2, 3, 1))
     net.numLayers should be(3)
 
-    net.biases.size should be(2)
-    net.biases.head.size should be(3)
-    net.biases(1).size should be(1)
+    net.b.size should be(2)
+    net.b.head.size should be(3)
+    net.b(1).size should be(1)
 
-    net.weights.size should be(2)
-    net.weights.head.cols should be(2)
-    net.weights.head.rows should be(3)
-    net.weights(1).cols should be(3)
-    net.weights(1).rows should be(1)
+    net.w.size should be(2)
+    net.w.head.cols should be(2)
+    net.w.head.rows should be(3)
+    net.w(1).cols should be(3)
+    net.w(1).rows should be(1)
   }
 
 }
