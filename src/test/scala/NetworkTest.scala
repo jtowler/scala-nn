@@ -12,9 +12,10 @@ class NetworkTest extends FlatSpec with Matchers {
     net.biases(1).size should be(1)
 
     net.weights.size should be(2)
-    net.weights.head.size should be(3)
-    net.weights.head.head.size should be(2)
-    net.weights(1).size should be(1)
+    net.weights.head.cols should be(2)
+    net.weights.head.rows should be(3)
+    net.weights(1).cols should be(3)
+    net.weights(1).rows should be(1)
   }
 
 }
