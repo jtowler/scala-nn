@@ -13,8 +13,9 @@ object Main extends App {
 //
 //  println(sum, carry)
 
-
   val net = Network(List(2, 3, 1))
-  println(net)
+
+  val dr = DataReader.readData("/Users/jack/IdeaProjects/scala-nn/src/main/resources/mnist_test.csv")
+  println(dr)
 
 }

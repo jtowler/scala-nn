@@ -17,6 +17,8 @@ target
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
 
+src/main/resources
+
 # Gradle
 .idea/**/gradle.xml
 
