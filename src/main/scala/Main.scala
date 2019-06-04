@@ -14,7 +14,7 @@ object Main extends App {
 //  println(sum, carry)
 
 
-  val net = new Network(List(2, 3, 1))
+  val net = Network(List(2, 3, 1))
   println(net)
 
 }

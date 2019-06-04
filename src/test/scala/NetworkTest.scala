@@ -4,7 +4,7 @@ class NetworkTest extends FlatSpec with Matchers {
 
   behavior of "Network"
   it should "correctly initialise weights and biases" in {
-    val net = new Network(List(2, 3, 1))
+    val net = Network(List(2, 3, 1))
     net.numLayers should be(3)
 
     net.b.size should be(2)
