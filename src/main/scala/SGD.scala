@@ -2,16 +2,16 @@ import Network.{Record, r}
 
 object SGD {
 
-  def StochasticGradientDescent(network: Network,
+  def stochasticGradientDescent(network: Network,
                                 trainData: List[Record],
                                 epochs: Int,
                                 miniBatchSize: Int,
                                 eta: Double,
-                                testData: Option[List[Record]]): Unit = {
+                                testData: Option[List[Record]]): Network = {
     val n = trainData.size
 
-    def inner(e: Int, net: Network): Unit = e match {
-      case x if x == epochs => ()
+    def inner(e: Int, net: Network): Network = e match {
+      case x if x == epochs => net
       case _ =>
         val shuffledTrain = r.shuffle(trainData)
         val miniBatches = (0 to n by miniBatchSize).map(k => shuffledTrain.slice(k, k + miniBatchSize))
@@ -23,7 +23,10 @@ object SGD {
         else {
           println(f"Epoch $e complete")
         }
+        inner(e + 1, newNet)
     }
+
+    inner(0, network)
   }
 
 }
