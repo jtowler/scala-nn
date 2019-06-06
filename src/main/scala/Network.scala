@@ -53,9 +53,9 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
 
     @annotation.tailrec
     def backwardPass(n: Int, nb: List[Vector], nw: List[Matrix], d: Vector): (List[Vector], List[Matrix]) = n match {
-      case i if i >= numLayers - 1 => (nb, nw)
+      case i if i >= numLayers => (nb, nw)
       case _ =>
-        val nd = (w(w.size - 1 - n).t * d) * sigmoidPrime(zs(zs.size - n))
+        val nd = (w(w.size - n + 1).t * d) * sigmoidPrime(zs.last)
         val nnb = nb.updated(nb.size - n, nd)
         val nnw = nw.updated(nb.size - n, delta * activations(activations.size - n - 1).t)
         backwardPass(n + 1, nnb, nnw, nd)
