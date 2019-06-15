@@ -17,8 +17,8 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
   private def costDerivative(outputActivations: Vector, y: Double): Vector = outputActivations - y
 
   def evaluate(testData: List[Record]): Int = {
-    val results: List[(Int, Int)] = testData.map { case (x, y) => (argmax(feedforward(x)), y) }
-    results.count { case (x, y) => x == y }
+    testData.map { case (x, y) => (argmax(feedforward(x)), y) }
+      .count { case (x, y) => x == y }
   }
 
   private def feedforward(a: Vector): Vector = {
@@ -32,15 +32,15 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
     inner(b, w, a)
   }
 
-  def backprop(record: Record): (List[Vector], List[Matrix]) = {
+  private def backprop(record: Record): (List[Vector], List[Matrix]) = {
 
     @annotation.tailrec
     def feedforward(bs: List[Vector], ws: List[Matrix], act: Vector, acts: List[Vector], zs: List[Vector]): (List[Vector], List[Vector]) = (bs, ws) match {
-      case (Nil, _) | (_, Nil) => (acts, zs)
+      case (Nil, _) | (_, Nil) => (acts.reverse , zs.reverse)
       case (bh :: bt, wh :: wt) =>
         val z = (wh * act) + bh
         val activation = sigmoid(z)
-        feedforward(bt, wt, activation, acts :+ activation, zs :+ z) // todo appending is very inefficient
+        feedforward(bt, wt, activation, activation :: acts, z :: zs) // todo error could be in this function somewhere
     }
 
     val (x, y) = record
