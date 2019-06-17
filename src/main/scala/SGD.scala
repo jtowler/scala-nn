@@ -14,7 +14,7 @@ object SGD {
       case x if x == epochs => net
       case _ =>
         val shuffledTrain = r.shuffle(trainData)
-        val miniBatches = (0 to n by miniBatchSize).map(k => shuffledTrain.slice(k, k + miniBatchSize))
+        val miniBatches = (0 until n by miniBatchSize).map(k => shuffledTrain.slice(k, k + miniBatchSize))
         val newNet = miniBatches.foldLeft(net){case (nt, l) => nt.updateMiniBatch(l, eta)}
         if (testData.isDefined) {
           val td = testData.get

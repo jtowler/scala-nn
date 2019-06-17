@@ -55,9 +55,10 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
     def backwardPass(n: Int, nb: List[Vector], nw: List[Matrix], d: Vector): (List[Vector], List[Matrix]) = n match {
       case i if i >= numLayers => (nb, nw)
       case _ =>
-        val nd = (w(w.size - n + 1).t * d) * sigmoidPrime(zs.last)
+        val sp = sigmoidPrime(zs(zs.size - n))
+        val nd = (w(w.size - n + 1).t * d) * sp
         val nnb = nb.updated(nb.size - n, nd)
-        val nnw = nw.updated(nb.size - n, delta * activations(activations.size - n - 1).t)
+        val nnw = nw.updated(nb.size - n, nd * activations(activations.size - n - 1).t)
         backwardPass(n + 1, nnb, nnw, nd)
     }
 
@@ -79,7 +80,11 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
     }
 
     val (nnB, nnW) = inner(miniBatch, nablaB, nablaW)
-    Network(sizes, nnB, nnW)
+    val k = eta / miniBatch.size
+    val retB = b.zip(nnB).map{case (oB, rB) => oB - k * rB}
+    val retW = w.zip(nnW).map{case (oW, rW) => oW - k * rW}
+
+    Network(sizes, retB, retW)
   }
 
 }
