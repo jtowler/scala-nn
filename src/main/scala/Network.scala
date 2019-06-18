@@ -10,7 +10,7 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
 
   private def sigmoidPrime(z: Vector): Vector = {
     val sig = sigmoid(z)
-    val i = DenseVector.ones[Double](sig.length)
+    val i = DenseVector.ones[Double](z.length)
     sig * (i - sig)
   }
 
