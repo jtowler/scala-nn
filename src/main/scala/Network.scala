@@ -14,9 +14,9 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
     sig * (i - sig)
   }
 
-  private def costDerivative(outputActivations: Vector, y: Double): Vector = outputActivations - y
+  private def costDerivative(outputActivations: Vector, y: Vector): Vector = outputActivations - y
 
-  def evaluate(testData: List[Record]): Int = {
+  def evaluate(testData: List[TestRecord]): Int = {
     testData.map { case (x, y) => (argmax(feedforward(x)), y) }
       .count { case (x, y) => x == y }
   }
@@ -93,7 +93,8 @@ object Network {
 
   type Matrix = DenseMatrix[Double]
   type Vector = DenseVector[Double]
-  type Record = (Vector, Int)
+  type Record = (Vector, Vector)
+  type TestRecord = (Vector, Int)
 
   val r: Random.type = scala.util.Random
 

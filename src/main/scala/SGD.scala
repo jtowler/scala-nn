@@ -1,4 +1,4 @@
-import Network.{Record, r}
+import Network.{Record, TestRecord, r}
 
 object SGD {
 
@@ -7,7 +7,7 @@ object SGD {
                                 epochs: Int,
                                 miniBatchSize: Int,
                                 eta: Double,
-                                testData: Option[List[Record]]): Network = {
+                                testData: Option[List[TestRecord]]): Network = {
     val n = trainData.size
 
     def inner(e: Int, net: Network): Network = e match {
