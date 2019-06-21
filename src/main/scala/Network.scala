@@ -1,6 +1,6 @@
-import Network._
-import breeze.linalg.{DenseMatrix, DenseVector, argmax}
+import breeze.linalg.{*, DenseMatrix, DenseVector, argmax, sum}
 import breeze.numerics.sigmoid
+import Network._
 
 import scala.util.Random
 
@@ -8,13 +8,12 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
 
   val numLayers: Int = sizes.size
 
-  private def sigmoidPrime(z: Vector): Vector = {
+  private def sigmoidPrime(z: Matrix): Matrix = {
     val sig = sigmoid(z)
-    val i = DenseVector.ones[Double](z.length)
-    sig * (i - sig)
+    sig *:* (DenseMatrix.ones[Double](z.rows, z.cols) - sig)
   }
 
-  private def costDerivative(outputActivations: Vector, y: Vector): Vector = outputActivations - y
+  private def costDerivative(outputActivations: Matrix, y: Matrix): Matrix = outputActivations - y
 
   def evaluate(testData: List[TestRecord]): Int = {
     testData.map { case (x, y) => (argmax(feedforward(x)), y) }
@@ -32,57 +31,49 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
     inner(b, w, a)
   }
 
-  private def backprop(record: Record): (List[Vector], List[Matrix]) = {
+  private def backprop(x: Matrix, y: Matrix): (List[Vector], List[Matrix]) = {
 
     @annotation.tailrec
-    def feedforward(bs: List[Vector], ws: List[Matrix], act: Vector, acts: List[Vector], zs: List[Vector]): (List[Vector], List[Vector]) = (bs, ws) match {
-      case (Nil, _) | (_, Nil) => (acts.reverse , zs.reverse)
+    def feedforward(bs: List[Vector], ws: List[Matrix], act: Matrix, acts: List[Matrix], zs: List[Matrix]): (List[Matrix], List[Matrix]) = (bs, ws) match {
+      case (Nil, _) | (_, Nil) => (acts.reverse, zs.reverse)
       case (bh :: bt, wh :: wt) =>
-        val z = (wh * act) + bh
+        val z1 = wh * act
+        val z = z1(::, *) + bh
         val activation = sigmoid(z)
-        feedforward(bt, wt, activation, activation :: acts, z :: zs) // todo error could be in this function somewhere
+        feedforward(bt, wt, activation, activation :: acts, z :: zs)
     }
 
-    val (x, y) = record
     val (activations, zs) = feedforward(b, w, x, List(x), List())
 
     val delta = costDerivative(activations.last, y) * sigmoidPrime(zs.last)
-
-    val nablaB = b.init.map(i => DenseVector.zeros[Double](i.length)) :+ delta
+    val nablaB = b.init.map(i => DenseVector.zeros[Double](i.length)) :+ sum(delta(*, ::))
     val nablaW = w.init.map(i => DenseMatrix.zeros[Double](i.rows, i.cols)) :+ (delta * activations(activations.size - 2).t)
 
     @annotation.tailrec
-    def backwardPass(n: Int, nb: List[Vector], nw: List[Matrix], d: Vector): (List[Vector], List[Matrix]) = n match {
+    def backwardPass(n: Int, nb: List[Vector], nw: List[Matrix], d: Matrix): (List[Vector], List[Matrix]) = n match {
       case i if i >= numLayers => (nb, nw)
       case _ =>
-        val sp = sigmoidPrime(zs(zs.size - n))
-        val nd = (w(w.size - n + 1).t * d) * sp
-        val nnb = nb.updated(nb.size - n, nd)
-        val nnw = nw.updated(nb.size - n, nd * activations(activations.size - n - 1).t)
+        val nd = (w(w.size - n + 1).t * d) *:* sigmoidPrime(zs(zs.size - n))
+        val nnb = nb.updated(nb.size - n, sum(nd(*, ::)))
+        val nnw = nw.updated(nw.size - n, nd * activations(activations.size - n - 1).t)
         backwardPass(n + 1, nnb, nnw, nd)
     }
 
     backwardPass(2, nablaB, nablaW, delta)
+
   }
 
   def updateMiniBatch(miniBatch: List[Record], eta: Double): Network = {
-    val nablaB = b.map(i => DenseVector.zeros[Double](i.length))
-    val nablaW = w.map(i => DenseMatrix.zeros[Double](i.rows, i.cols))
+    val (xs, ys) = miniBatch.map(r => (r._1, r._2)).unzip
 
-    @annotation.tailrec
-    def inner(mB: List[Record], nb: List[Vector], nw: List[Matrix]): (List[Vector], List[Matrix]) = mB match {
-      case Nil => (nb, nw)
-      case h :: t =>
-        val (dnb, dnw) = backprop(h)
-        val nnb = nb.zip(dnb).map { case (x, y) => x + y }
-        val nnw = nw.zip(dnw).map { case (x, y) => x + y }
-        inner(t, nnb, nnw)
-    }
+    val xMatrix = DenseMatrix(xs: _ *).t
+    val yMatrix = DenseMatrix(ys: _ *).t
 
-    val (nnB, nnW) = inner(miniBatch, nablaB, nablaW)
+    val (nablaB, nablaW) = backprop(xMatrix, yMatrix)
+
     val k = eta / miniBatch.size
-    val retB = b.zip(nnB).map{case (oB, rB) => oB - k * rB}
-    val retW = w.zip(nnW).map{case (oW, rW) => oW - k * rW}
+    val retB = b.zip(nablaB).map { case (oB, rB) => oB - (k * rB) }
+    val retW = w.zip(nablaW).map { case (oW, rW) => oW - (k * rW) }
 
     Network(sizes, retB, retW)
   }
