@@ -8,11 +8,6 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
 
   val numLayers: Int = sizes.size
 
-  private def sigmoidPrime(z: Matrix): Matrix = {
-    val sig = sigmoid(z)
-    sig *:* (DenseMatrix.ones[Double](z.rows, z.cols) - sig)
-  }
-
   private def costDerivative(outputActivations: Matrix, y: Matrix): Matrix = outputActivations - y
 
   def evaluate(testData: List[TestRecord]): Int = {
@@ -96,6 +91,11 @@ object Network {
       case (x, y) => DenseMatrix.fill(y, x)(r.nextGaussian())
     }
     Network(sizes, b, w)
+  }
+
+  def sigmoidPrime(z: Matrix): Matrix = {
+    val sig = sigmoid(z)
+    sig *:* (DenseMatrix.ones[Double](z.rows, z.cols) - sig)
   }
 
 }
