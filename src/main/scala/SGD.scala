@@ -1,4 +1,5 @@
-import Network.{Record, TestRecord, r}
+import Network.r
+import Utils.{Record, TestRecord}
 
 object SGD {
 

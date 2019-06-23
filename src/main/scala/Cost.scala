@@ -1,4 +1,4 @@
-import Network.{Matrix, Vector, sigmoidPrime}
+import Utils.{Matrix, Vector, sigmoidPrime}
 import breeze.linalg.{DenseVector, norm, sum}
 import breeze.numerics.log
 

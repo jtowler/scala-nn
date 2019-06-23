@@ -1,11 +1,11 @@
-import Network.{Record, TestRecord, Vector}
+import Utils.{Record, TestRecord, Vector}
 import breeze.linalg.DenseVector
 
 import scala.util.Try
 
 object DataReader {
 
-  private def encode(v: Int, len: Int): Vector = DenseVector.tabulate(len){
+  private def encode(v: Int, len: Int): Vector = DenseVector.tabulate(len) {
     l => if (v == l) 1d else 0d
   }
 

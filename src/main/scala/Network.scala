@@ -1,6 +1,6 @@
+import Utils.{Matrix, Vector, sigmoidPrime, Record, TestRecord}
 import breeze.linalg.{*, DenseMatrix, DenseVector, argmax, sum}
 import breeze.numerics.sigmoid
-import Network._
 
 import scala.util.Random
 
@@ -77,11 +77,6 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
 
 object Network {
 
-  type Matrix = DenseMatrix[Double]
-  type Vector = DenseVector[Double]
-  type Record = (Vector, Vector)
-  type TestRecord = (Vector, Int)
-
   val r: Random.type = scala.util.Random
 
   def apply(sizes: List[Int]): Network = {
@@ -91,11 +86,6 @@ object Network {
       case (x, y) => DenseMatrix.fill(y, x)(r.nextGaussian())
     }
     Network(sizes, b, w)
-  }
-
-  def sigmoidPrime(z: Matrix): Matrix = {
-    val sig = sigmoid(z)
-    sig *:* (DenseMatrix.ones[Double](z.rows, z.cols) - sig)
   }
 
 }
