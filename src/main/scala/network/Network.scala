@@ -85,6 +85,15 @@ object Network {
 
     val b: List[Vector] = sizes.tail.map(s => DenseVector.fill(s)(r.nextGaussian()))
     val w: List[Matrix] = sizes.init.zip(sizes.tail).map {
+      case (x, y) => DenseMatrix.fill(y, x)(r.nextGaussian() / math.sqrt(x))
+    }
+    Network(sizes, b, w)
+  }
+
+  def largeWeightInitialiser(sizes: List[Int]): Network = {
+
+    val b: List[Vector] = sizes.tail.map(s => DenseVector.fill(s)(r.nextGaussian()))
+    val w: List[Matrix] = sizes.init.zip(sizes.tail).map {
       case (x, y) => DenseMatrix.fill(y, x)(r.nextGaussian())
     }
     Network(sizes, b, w)
