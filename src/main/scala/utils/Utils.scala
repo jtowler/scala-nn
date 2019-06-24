@@ -1,3 +1,5 @@
+package utils
+
 import breeze.linalg.{DenseMatrix, DenseVector}
 import breeze.numerics.sigmoid
 

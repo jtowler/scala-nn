@@ -1,3 +1,6 @@
+import network.Network
+import utils.DataReader
+
 object Main extends App {
 
   val net = Network(List(784, 30, 10))

@@ -1,5 +1,6 @@
-import Network.r
-import Utils.{Record, TestRecord}
+import utils.Utils.{Record, TestRecord}
+import network.Network
+import network.Network.r  // todo do something about this import, it's weird
 
 object SGD {
 

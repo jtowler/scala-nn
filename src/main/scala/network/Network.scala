@@ -1,6 +1,8 @@
-import Utils.{Matrix, Vector, sigmoidPrime, Record, TestRecord}
+package network
+
 import breeze.linalg.{*, DenseMatrix, DenseVector, argmax, sum}
 import breeze.numerics.sigmoid
+import utils.Utils._
 
 import scala.util.Random
 
@@ -70,7 +72,7 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
     val retB = b.zip(nablaB).map { case (oB, rB) => oB - (k * rB) }
     val retW = w.zip(nablaW).map { case (oW, rW) => oW - (k * rW) }
 
-    Network(sizes, retB, retW)
+    network.Network(sizes, retB, retW)
   }
 
 }

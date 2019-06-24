@@ -1,8 +1,9 @@
+import network.Network
 import org.scalatest.{FlatSpec, Matchers}
 
 class NetworkTest extends FlatSpec with Matchers {
 
-  behavior of "Network"
+  behavior of "network.Network"
   it should "correctly initialise weights and biases" in {
     val net = Network(List(2, 3, 1))
     net.numLayers should be(3)

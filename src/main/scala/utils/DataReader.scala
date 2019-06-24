@@ -1,5 +1,7 @@
-import Utils.{Record, TestRecord, Vector}
+package utils
+
 import breeze.linalg.DenseVector
+import utils.Utils.{Record, TestRecord, Vector}
 
 import scala.util.Try
 

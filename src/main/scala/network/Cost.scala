@@ -1,6 +1,8 @@
-import Utils.{Matrix, Vector, sigmoidPrime}
+package network
+
 import breeze.linalg.{DenseVector, norm, sum}
 import breeze.numerics.log
+import utils.Utils.{Matrix, Vector, sigmoidPrime}
 
 sealed trait Cost {
   def fn(a: Vector, y: Vector): Double
