@@ -6,7 +6,7 @@ import utils.Utils._
 
 import scala.util.Random
 
-case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
+case class Network(sizes: List[Int], cost: Cost, b: List[Vector], w: List[Matrix]) {
 
   val numLayers: Int = sizes.size
 
@@ -60,7 +60,7 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
 
   }
 
-  def updateMiniBatch(miniBatch: List[Record], eta: Double): Network = {
+  def updateMiniBatch(miniBatch: List[Record], eta: Double, lambda: Double, n: Int): Network = {
     val (xs, ys) = miniBatch.map(r => (r._1, r._2)).unzip
 
     val xMatrix = DenseMatrix(xs: _ *).t
@@ -70,9 +70,9 @@ case class Network(sizes: List[Int], b: List[Vector], w: List[Matrix]) {
 
     val k = eta / miniBatch.size
     val retB = b.zip(nablaB).map { case (oB, rB) => oB - (k * rB) }
-    val retW = w.zip(nablaW).map { case (oW, rW) => oW - (k * rW) }
+    val retW = w.zip(nablaW).map { case (oW, rW) => (1 - eta * (lambda / n)) * oW - (k * rW) }
 
-    network.Network(sizes, retB, retW)
+    network.Network(sizes, cost, retB, retW)
   }
 
 }
@@ -81,22 +81,22 @@ object Network {
 
   val r: Random.type = scala.util.Random
 
-  def apply(sizes: List[Int]): Network = {
+  def apply(sizes: List[Int], cost: Cost = CrossEntropyCost): Network = {
 
     val b: List[Vector] = sizes.tail.map(s => DenseVector.fill(s)(r.nextGaussian()))
     val w: List[Matrix] = sizes.init.zip(sizes.tail).map {
       case (x, y) => DenseMatrix.fill(y, x)(r.nextGaussian() / math.sqrt(x))
     }
-    Network(sizes, b, w)
+    Network(sizes, cost, b, w)
   }
 
-  def largeWeightInitialiser(sizes: List[Int]): Network = {
+  def largeWeightInitialiser(sizes: List[Int], cost: Cost = CrossEntropyCost): Network = {
 
     val b: List[Vector] = sizes.tail.map(s => DenseVector.fill(s)(r.nextGaussian()))
     val w: List[Matrix] = sizes.init.zip(sizes.tail).map {
       case (x, y) => DenseMatrix.fill(y, x)(r.nextGaussian())
     }
-    Network(sizes, b, w)
+    Network(sizes, cost, b, w)
   }
 
 }

@@ -9,6 +9,7 @@ object SGD {
                                 epochs: Int,
                                 miniBatchSize: Int,
                                 eta: Double,
+                                lambda: Double,
                                 testData: Option[List[TestRecord]]): Network = {
     val n = trainData.size
 
@@ -17,7 +18,7 @@ object SGD {
       case _ =>
         val shuffledTrain = r.shuffle(trainData)
         val miniBatches = (0 until n by miniBatchSize).map(k => shuffledTrain.slice(k, k + miniBatchSize))
-        val newNet = miniBatches.foldLeft(net){case (nt, l) => nt.updateMiniBatch(l, eta)}
+        val newNet = miniBatches.foldLeft(net){case (nt, l) => nt.updateMiniBatch(l, eta, lambda, n)}
         if (testData.isDefined) {
           val td = testData.get
           println(f"Epoch $e: ${newNet.evaluate(td)} / ${td.size}")
