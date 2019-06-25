@@ -1,7 +1,7 @@
 package network
 
-import breeze.linalg.{*, DenseMatrix, DenseVector, argmax, sum}
-import breeze.numerics.sigmoid
+import breeze.linalg.{*, DenseMatrix, DenseVector, Transpose, argmax, norm, sum}
+import breeze.numerics.{pow, sigmoid}
 import utils.Utils._
 
 import scala.util.Random
@@ -9,8 +9,6 @@ import scala.util.Random
 case class Network(sizes: List[Int], cost: Cost, b: List[Vector], w: List[Matrix]) {
 
   val numLayers: Int = sizes.size
-
-  private def costDerivative(outputActivations: Matrix, y: Matrix): Matrix = outputActivations - y
 
   def evaluate(testData: List[TestRecord]): Int = {
     testData.map { case (x, y) => (argmax(feedforward(x)), y) }
@@ -42,7 +40,7 @@ case class Network(sizes: List[Int], cost: Cost, b: List[Vector], w: List[Matrix
 
     val (activations, zs) = feedforward(b, w, x, List(x), List())
 
-    val delta = costDerivative(activations.last, y) * sigmoidPrime(zs.last)
+    val delta = cost.delta(zs.last, activations.last, y)
     val nablaB = b.init.map(i => DenseVector.zeros[Double](i.length)) :+ sum(delta(*, ::))
     val nablaW = w.init.map(i => DenseMatrix.zeros[Double](i.rows, i.cols)) :+ (delta * activations(activations.size - 2).t)
 
@@ -73,6 +71,16 @@ case class Network(sizes: List[Int], cost: Cost, b: List[Vector], w: List[Matrix
     val retW = w.zip(nablaW).map { case (oW, rW) => (1 - eta * (lambda / n)) * oW - (k * rW) }
 
     network.Network(sizes, cost, retB, retW)
+  }
+
+  def totalCost(data: List[Record], lambda: Double): Double = {
+    val n = data.size
+    val c = data.foldLeft(0d) {
+      case (acc, (x, y)) =>
+        val a = feedforward(x)
+        acc + cost.fn(a, y) / n
+    }
+    c + (0.5 * (lambda / n) * sum(w.map(x => math.pow(norm(x.flatten()), 2))))
   }
 
 }
