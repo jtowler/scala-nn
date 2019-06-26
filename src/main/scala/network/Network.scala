@@ -1,7 +1,7 @@
 package network
 
-import breeze.linalg.{*, DenseMatrix, DenseVector, Transpose, argmax, norm, sum}
-import breeze.numerics.{pow, sigmoid}
+import breeze.linalg.{*, DenseMatrix, DenseVector, argmax, norm, sum}
+import breeze.numerics.sigmoid
 import utils.Utils._
 
 import scala.util.Random
