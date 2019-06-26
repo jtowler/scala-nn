@@ -1,6 +1,6 @@
 package utils
 
-import breeze.linalg.DenseVector
+import breeze.linalg.{DenseMatrix, DenseVector}
 import utils.Utils.{Record, TestRecord, Vector}
 
 import scala.util.Try
@@ -42,5 +42,31 @@ object DataReader {
     bufferedSource.close
     records
   }
+
+  private def miniExpander(record: Record): List[Record] = {
+    val (x, y) = record
+    val n = math.sqrt(x.size).toInt
+    List(record, (DenseVector.vertcat(x.slice(n, x.size), DenseVector.fill(n)(0d)), y))
+
+  }
+
+  private def fullExpander(record: Record): List[Record] = {
+    val (x, y) = record
+    val n = math.sqrt(x.size).toInt
+    val d = x.toDenseMatrix.reshape(n, n)
+    val vert = DenseMatrix.fill(n, 1)(0d)
+    val horz = DenseMatrix.fill(1, n)(0d)
+    record :: List(
+      DenseMatrix.horzcat(d(::, 1 until n), vert),
+      DenseMatrix.horzcat(vert, d(::, 0 until n - 1)),
+      DenseMatrix.vertcat(d(1 until n, ::), horz),
+      DenseMatrix.vertcat(horz, d(0 until n - 1, ::))
+    ).map(
+      m => (m.toDenseVector, y)
+    )
+  }
+
+  def expandRecords(records: List[Record]): List[Record] = records flatMap fullExpander
+  def doubleRecords(records: List[Record]): List[Record] = records flatMap miniExpander
 
 }
