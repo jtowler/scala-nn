@@ -43,16 +43,14 @@ object DataReader {
     records
   }
 
-  private def miniExpander(record: Record): List[Record] = {
+  private def miniExpander(record: Record, n: Int): List[Record] = {
     val (x, y) = record
-    val n = math.sqrt(x.size).toInt
     List(record, (DenseVector.vertcat(x.slice(n, x.size), DenseVector.fill(n)(0d)), y))
 
   }
 
-  private def fullExpander(record: Record): List[Record] = {
+  private def fullExpander(record: Record, n: Int): List[Record] = {
     val (x, y) = record
-    val n = math.sqrt(x.size).toInt
     val d = x.toDenseMatrix.reshape(n, n)
     val vert = DenseMatrix.fill(n, 1)(0d)
     val horz = DenseMatrix.fill(1, n)(0d)
@@ -66,7 +64,17 @@ object DataReader {
     )
   }
 
-  def expandRecords(records: List[Record]): List[Record] = records flatMap fullExpander
-  def doubleRecords(records: List[Record]): List[Record] = records flatMap miniExpander
+  // TODO: make these more efficient
+
+  def expandRecords(records: List[Record]): List[Record] = {
+    val n = math.sqrt(records.head._1.size).toInt
+    records.flatMap(fullExpander(_, n))
+  }
+
+  def doubleRecords(records: List[Record]): List[Record] = {
+    val n = math.sqrt(records.head._1.size).toInt
+    records.flatMap(miniExpander(_, n))
+  }
+
 
 }
