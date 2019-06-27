@@ -1,7 +1,7 @@
 package utils
 
 import breeze.linalg.{DenseMatrix, DenseVector}
-import utils.Utils.{Record, TestRecord, Vector}
+import utils.Utils.{Matrix, Record, TestRecord, Vector}
 
 import scala.util.Try
 
@@ -43,17 +43,14 @@ object DataReader {
     records
   }
 
-  private def miniExpander(record: Record, n: Int): List[Record] = {
+  private def miniExpander(record: Record, n: Int, vert: Vector): List[Record] = {
     val (x, y) = record
-    List(record, (DenseVector.vertcat(x.slice(n, x.size), DenseVector.fill(n)(0d)), y))
-
+    List(record, (DenseVector.vertcat(x.slice(n, x.size), vert), y))
   }
 
-  private def fullExpander(record: Record, n: Int): List[Record] = {
+  private def fullExpander(record: Record, n: Int, vert: Matrix, horz: Matrix): List[Record] = {
     val (x, y) = record
     val d = x.toDenseMatrix.reshape(n, n)
-    val vert = DenseMatrix.fill(n, 1)(0d)
-    val horz = DenseMatrix.fill(1, n)(0d)
     record :: List(
       DenseMatrix.horzcat(d(::, 1 until n), vert),
       DenseMatrix.horzcat(vert, d(::, 0 until n - 1)),
@@ -64,17 +61,17 @@ object DataReader {
     )
   }
 
-  // TODO: make these more efficient
-
   def expandRecords(records: List[Record]): List[Record] = {
     val n = math.sqrt(records.head._1.size).toInt
-    records.flatMap(fullExpander(_, n))
+    val vert = DenseMatrix.fill(n, 1)(0d)
+    val horz = DenseMatrix.fill(1, n)(0d)
+    records.flatMap(fullExpander(_, n, vert, horz))
   }
 
   def doubleRecords(records: List[Record]): List[Record] = {
     val n = math.sqrt(records.head._1.size).toInt
-    records.flatMap(miniExpander(_, n))
+    val vert = DenseVector.fill(n)(0d)
+    records.flatMap(miniExpander(_, n, vert))
   }
-
 
 }
