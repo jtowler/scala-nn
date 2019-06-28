@@ -9,8 +9,6 @@ object SGD {
     (0 until n by miniBatchSize).map(k => shuffledTrain.slice(k, k + miniBatchSize))
   }
 
-  // todo lots of code duplication here
-
   def stochasticGradientDescent(network: Network,
                                 trainData: List[Record],
                                 epochs: Int,
@@ -20,6 +18,7 @@ object SGD {
                                 testData: Option[List[TestRecord]]): Network = {
     val n = trainData.size
 
+    @annotation.tailrec
     def inner(e: Int, net: Network): Network = e match {
       case x if x == epochs => net
       case _ =>
@@ -47,6 +46,7 @@ object SGD {
                                          testData: List[TestRecord]): Network = {
     val n = trainData.size
 
+    @annotation.tailrec
     def inner(e: Int, lastEval: Int, i: Int, net: Network): Network = i match {
       case x if x == stopInN =>
         println(s"No improvement in $stopInN epochs. Stopping.")
@@ -82,6 +82,7 @@ object SGD {
       schedule(index)
     }
 
+    @annotation.tailrec
     def inner(e: Int, net: Network): Network = e match {
       case x if x == epochs => net
       case _ =>
