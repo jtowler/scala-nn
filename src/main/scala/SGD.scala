@@ -4,6 +4,11 @@ import utils.Utils.{Record, TestRecord}
 
 object SGD {
 
+  private def getMiniBatches(trainData: List[Record], n: Int, miniBatchSize: Int) = {
+    val shuffledTrain = r.shuffle(trainData)
+    (0 until n by miniBatchSize).map(k => shuffledTrain.slice(k, k + miniBatchSize))
+  }
+
   // todo lots of code duplication here
 
   def stochasticGradientDescent(network: Network,
@@ -18,8 +23,7 @@ object SGD {
     def inner(e: Int, net: Network): Network = e match {
       case x if x == epochs => net
       case _ =>
-        val shuffledTrain = r.shuffle(trainData)
-        val miniBatches = (0 until n by miniBatchSize).map(k => shuffledTrain.slice(k, k + miniBatchSize))
+        val miniBatches = getMiniBatches(trainData, n, miniBatchSize)
         val newNet = miniBatches.foldLeft(net) { case (nt, l) => nt.updateMiniBatch(l, eta, lambda, n) }
         if (testData.isDefined) {
           val td = testData.get
@@ -48,8 +52,7 @@ object SGD {
         println(s"No improvement in $stopInN epochs. Stopping.")
         net
       case _ =>
-        val shuffledTrain = r.shuffle(trainData)
-        val miniBatches = (0 until n by miniBatchSize).map(k => shuffledTrain.slice(k, k + miniBatchSize))
+        val miniBatches = getMiniBatches(trainData, n, miniBatchSize)
         val newNet = miniBatches.foldLeft(net) { case (nt, l) => nt.updateMiniBatch(l, eta, lambda, n) }
         val eval = newNet.evaluate(testData)
         println(f"Epoch $e: $eval / ${testData.size}")
@@ -82,8 +85,7 @@ object SGD {
     def inner(e: Int, net: Network): Network = e match {
       case x if x == epochs => net
       case _ =>
-        val shuffledTrain = r.shuffle(trainData)
-        val miniBatches = (0 until n by miniBatchSize).map(k => shuffledTrain.slice(k, k + miniBatchSize))
+        val miniBatches = getMiniBatches(trainData, n, miniBatchSize)
         val newNet = miniBatches.foldLeft(net) { case (nt, l) => nt.updateMiniBatch(l, scheduledEta(e), lambda, n) }
         if (testData.isDefined) {
           val td = testData.get
