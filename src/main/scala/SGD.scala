@@ -4,6 +4,8 @@ import utils.Utils.{Record, TestRecord}
 
 object SGD {
 
+  // todo lots of code duplication here
+
   def stochasticGradientDescent(network: Network,
                                 trainData: List[Record],
                                 epochs: Int,
@@ -61,6 +63,39 @@ object SGD {
     inner(0, 0, 0, network)
   }
 
-  // todo add learning rate schedule
+  def stochasticGradientDescentSchedule(network: Network,
+                                        trainData: List[Record],
+                                        schedule: Map[Int, Double],
+                                        miniBatchSize: Int,
+                                        lambda: Double,
+                                        testData: Option[List[TestRecord]]): Network = {
+    val n = trainData.size
+    val epochs = schedule.keys.max
+
+    def scheduledEta(epoch: Int): Double = {
+      val index = schedule
+        .keys.toList.sorted
+        .find(_ > epoch).getOrElse(epochs)
+      schedule(index)
+    }
+
+    def inner(e: Int, net: Network): Network = e match {
+      case x if x == epochs => net
+      case _ =>
+        val shuffledTrain = r.shuffle(trainData)
+        val miniBatches = (0 until n by miniBatchSize).map(k => shuffledTrain.slice(k, k + miniBatchSize))
+        val newNet = miniBatches.foldLeft(net) { case (nt, l) => nt.updateMiniBatch(l, scheduledEta(e), lambda, n) }
+        if (testData.isDefined) {
+          val td = testData.get
+          println(f"Epoch $e: ${newNet.evaluate(td)} / ${td.size}")
+        }
+        else {
+          println(f"Epoch $e complete")
+        }
+        inner(e + 1, newNet)
+    }
+
+    inner(0, network)
+  }
 
 }
