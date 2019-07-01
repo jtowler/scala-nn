@@ -11,36 +11,32 @@ object DataReader {
     l => if (v == l) 1d else 0d
   }
 
-  def readData(fn: String, len: Int): List[Record] = {
+  private def readDataGen[A](fn: String)(func: Array[String] => A): List[A] = {
     val bufferedSource = io.Source.fromFile(fn)
     val records = (for {
       line <- bufferedSource.getLines
       cols = line.split(",")
-      r = Try {
-        val y = encode(cols.head.toInt, len)
-        val x = DenseVector(cols.tail.map(_.toInt / 255d))
-        (x, y)
-      }
+      r = Try (func(cols))
       if r.isSuccess
     } yield r.get).toList
     bufferedSource.close
     records
   }
 
+  def readData(fn: String, len: Int): List[Record] = {
+    readDataGen(fn){ cols =>
+      val y = encode(cols.head.toInt, len)
+      val x = DenseVector(cols.tail.map(_.toInt / 255d))
+      (x, y)
+    }
+  }
+
   def readTestData(fn: String): List[TestRecord] = {
-    val bufferedSource = io.Source.fromFile(fn)
-    val records = (for {
-      line <- bufferedSource.getLines
-      cols = line.split(",")
-      r = Try {
-        val y = cols.head.toInt
-        val x = DenseVector(cols.tail.map(_.toInt / 255d))
-        (x, y)
-      }
-      if r.isSuccess
-    } yield r.get).toList
-    bufferedSource.close
-    records
+    readDataGen(fn){ cols =>
+      val y = cols.head.toInt
+      val x = DenseVector(cols.tail.map(_.toInt / 255d))
+      (x, y)
+    }
   }
 
   private def miniExpander(record: Record, n: Int, vert: Vector): List[Record] = {
